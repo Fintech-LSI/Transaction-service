@@ -1,29 +1,25 @@
 package com.lsi.transaction.controller;
 
-import com.lsi.transaction.controller.dto.request.CreateWalletRequest;
-import com.lsi.transaction.controller.dto.response.WalletResponse;
-import com.lsi.transaction.service.feignClientService.WalletServiceClient;
+import com.lsi.transaction.entity.Transaction;
+import com.lsi.transaction.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/transaction")
 public class transactionController {
   @Autowired
-  WalletServiceClient walletServiceClient;
+  private TransactionRepository transactionRepository;
 
   @GetMapping("/test")
-  public ResponseEntity<WalletResponse> test() {
-    CreateWalletRequest createWalletRequest = CreateWalletRequest.builder()
-      .initialBalance(0.0)
-      .currencyCode("MAD")
-      .userId(1L)
-      .build();
+  public ResponseEntity<List<Transaction>> test() {
 
-    return ResponseEntity.ok(walletServiceClient.createWallet(createWalletRequest));
+    return ResponseEntity.ok(transactionRepository.findAll());
   }
 
 

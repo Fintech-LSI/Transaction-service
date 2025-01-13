@@ -1,4 +1,4 @@
-package com.lsi.transaction.controller.dto.response;
+package com.lsi.transaction.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
