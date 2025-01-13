@@ -35,5 +35,10 @@ public class Transaction implements Serializable {
   @Column(nullable = true)
   private String description; // Optional description or reason for the transaction
 
-
+  @PrePersist
+  public void prePersist() {
+    if (timestamp == null) {
+      timestamp = LocalDateTime.now();
+    }
+  }
 }
