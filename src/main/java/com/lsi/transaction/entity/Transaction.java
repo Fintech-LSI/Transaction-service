@@ -40,5 +40,8 @@ public class Transaction implements Serializable {
     if (timestamp == null) {
       timestamp = LocalDateTime.now();
     }
+    if (status == null) {
+      status = TransactionStatus.PENDING;
+    }
   }
 }
