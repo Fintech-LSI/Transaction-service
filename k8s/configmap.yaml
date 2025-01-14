@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: transaction-service-config
+data:
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka-service:9092"
+  SPRING_CONFIG_IMPORT: "optional:configserver:http://config-server-service:8889"
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server-service:8761/eureka/"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-instance.c122egeymo28.us-east-1.rds.amazonaws.com:5432/transaction_service_db"
