@@ -41,7 +41,7 @@ pipeline {
             }
         }
 
-        /*stage('Quality Gate') {
+        stage('Quality Gate') {
             steps {
                 script {
                     timeout(time: 5, unit: 'MINUTES') {
@@ -63,7 +63,7 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        /*stage('Run Tests') {
             steps {
                 script {
                     try {
@@ -73,7 +73,7 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
 
         stage('Build & Push Docker Image') {
             steps {
