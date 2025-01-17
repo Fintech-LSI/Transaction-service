@@ -2,8 +2,40 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: transaction-service-config
+  namespace: fintech
 data:
-  SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka-service:9092"
-  SPRING_CONFIG_IMPORT: "optional:configserver:http://config-server-service:8889"
-  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server-service:8761/eureka/"
-  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-instance.c122egeymo28.us-east-1.rds.amazonaws.com:5432/transaction_service_db"
+  application.yml: |-
+    spring:
+      application:
+        name: transaction-service
+      jpa:
+        hibernate:
+          ddl-auto: update
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+      config:
+        import: optional:configserver:http://config-service:8889
+      kafka:
+        consumer:
+          bootstrap-servers: kafka:9092
+          group-id: transaction-service-group
+          auto-offset-reset: earliest
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+          properties:
+            spring.json.trusted.packages: "*"
+            spring.json.type.mapping: transactionRequest:com.lsi.transaction.dto.request.TransactionRequest
+            spring.json.use.type.headers: false
+    
+    server:
+      port: 8599
+    
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: "*"
+      endpoint:
+        health:
+          show-details: when-authorized
+          probes:
+            enabled: true

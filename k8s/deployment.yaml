@@ -2,10 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: transaction-service-deploy
-  labels:
-    app: transaction-service
+  namespace: fintech
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: transaction-service
@@ -16,30 +15,38 @@ spec:
     spec:
       containers:
         - name: transaction-service
-          image: ${ECR_REGISTRY}/transaction-service:latest
+          image: public.ecr.aws/z1z0w2y6/transaction-service:latest  # Update this with your actual image
           ports:
             - containerPort: 8599
           envFrom:
             - configMapRef:
                 name: transaction-service-config
-            - secretRef:
-                name: transaction-service-secrets
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: url
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
           readinessProbe:
             httpGet:
               path: /actuator/health
               port: 8599
             initialDelaySeconds: 30
             periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8599
-            initialDelaySeconds: 60
-            periodSeconds: 15
-          resources:
-            requests:
-              memory: "200Mi"
-              cpu: "100m"
-            limits:
-              memory: "400Mi"
-              cpu: "200m"

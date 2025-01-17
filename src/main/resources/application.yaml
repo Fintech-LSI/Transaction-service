@@ -2,10 +2,10 @@ spring:
   application:
     name: transaction-service
   config:
-    import: optional:configserver:http://localhost:8889
+    import: optional:configserver:http://config-service:8889
   kafka:
     consumer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: kafka:9092
       group-id: transaction-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
