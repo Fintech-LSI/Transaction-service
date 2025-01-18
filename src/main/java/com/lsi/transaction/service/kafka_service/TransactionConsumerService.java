@@ -41,14 +41,19 @@ public class TransactionConsumerService {
             .description(request.getDescription())
             .build();
           transactionService.createTransfer(transfer);
-          NotificationRequest notificationRequest = NotificationRequest.builder()
-            .userId(walletFeignClient.getUser(request.getWalletId()))
-            .message("Your Transfer has been processed to wallet "+request.getTargetWalletId())
-            .build();
 
-          transactionProducerService.sendNotificationRequests(notificationRequest);
+          createNotification(
+            "Your transaction has been processed:: transfer "+request.getAmount()
+              +" from "+request.getWalletId()+" to "+request.getTargetWalletId(),
+            request.getWalletId()
+          );
 
 
+          createNotification(
+            "Your transaction has been processed:: received "+request.getAmount()
+              +" from "+request.getWalletId(),
+            request.getTargetWalletId()
+          );
 
 
           break;
@@ -80,10 +85,10 @@ public class TransactionConsumerService {
     }
   }
 
-  private void createNotification(String message , Long userId) {
+  private void createNotification(String message , Long walletId) {
     NotificationRequest notificationRequest2 = NotificationRequest.builder()
-      .userId(walletFeignClient.getUser())
-      .message(" you have received a transfer from wallet :"+request.getWalletId())
+      .userId(walletFeignClient.getUser(walletId))
+      .message(message)
       .build();
 
     transactionProducerService.sendNotificationRequests(notificationRequest2);
