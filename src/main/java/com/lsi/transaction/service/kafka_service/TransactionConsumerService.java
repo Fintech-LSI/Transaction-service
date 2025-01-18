@@ -1,11 +1,14 @@
-package com.lsi.transaction.service;
+package com.lsi.transaction.service.kafka_service;
 
 
+import com.lsi.transaction.dto.request.NotificationRequest;
 import com.lsi.transaction.dto.request.TransactionRequest;
 import com.lsi.transaction.entity.Deposit;
 import com.lsi.transaction.entity.MoneyMethods;
 import com.lsi.transaction.entity.Transfer;
 import com.lsi.transaction.entity.WithDraw;
+import com.lsi.transaction.service.TransactionService;
+import com.lsi.transaction.service.feign_clients.WalletFeignClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -19,7 +22,8 @@ import java.time.LocalDateTime;
 public class TransactionConsumerService {
 
   private final TransactionService transactionService;
-
+  private final TransactionProducerService transactionProducerService;
+  private final WalletFeignClient walletFeignClient;
   @KafkaListener(
     topics = "transaction-requests",
     groupId = "transaction-service-group"
@@ -37,6 +41,16 @@ public class TransactionConsumerService {
             .description(request.getDescription())
             .build();
           transactionService.createTransfer(transfer);
+          NotificationRequest notificationRequest = NotificationRequest.builder()
+            .userId(walletFeignClient.getUser(request.getWalletId()))
+            .message("Your Transfer has been processed to wallet "+request.getTargetWalletId())
+            .build();
+
+          transactionProducerService.sendNotificationRequests(notificationRequest);
+
+
+
+
           break;
 
         case "DEPOSIT":
@@ -66,4 +80,12 @@ public class TransactionConsumerService {
     }
   }
 
+  private void createNotification(String message , Long userId) {
+    NotificationRequest notificationRequest2 = NotificationRequest.builder()
+      .userId(walletFeignClient.getUser())
+      .message(" you have received a transfer from wallet :"+request.getWalletId())
+      .build();
+
+    transactionProducerService.sendNotificationRequests(notificationRequest2);
+  }
 }
