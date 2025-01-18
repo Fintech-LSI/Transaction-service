@@ -1,13 +1,11 @@
 spring:
-  profiles:
-    active: local
   application:
     name: transaction-service
   config:
-    import: optional:configserver:http://config-service:8889
+    import: optional:configserver:http://localhost:8889
   kafka:
     consumer:
-      bootstrap-servers: 10.0.0.26:9092
+      bootstrap-servers: localhost:9092
       group-id: transaction-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -17,8 +15,9 @@ spring:
         spring.json.type.mappings: transactionRequest:com.lsi.transaction.dto.request.TransactionRequest
         spring.json.use.type.headers: false
         spring.json.value.default.type: com.lsi.transaction.dto.request.TransactionRequest
+
     producer:
-      bootstrap-servers: 10.0.0.26:9092
+      bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:

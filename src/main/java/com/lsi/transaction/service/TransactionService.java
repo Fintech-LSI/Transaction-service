@@ -6,6 +6,7 @@ import com.lsi.transaction.repository.DepositRepository;
 import com.lsi.transaction.repository.TransactionRepository;
 import com.lsi.transaction.repository.TransferRepository;
 import com.lsi.transaction.repository.WithDrawRepository;
+import com.lsi.transaction.service.feign_clients.WalletFeignClient;
 import com.lsi.transaction.service.kafka_service.TransactionProducerService;
 import org.hibernate.TransactionException;
 import org.springframework.stereotype.Service;
@@ -21,21 +22,23 @@ public class TransactionService {
   private final DepositRepository depositRepository;
   private final WithDrawRepository withDrawRepository;
 
-
   private final TransactionProducerService transactionProducerService;
+  private final WalletFeignClient walletFeignClient;
 
   public TransactionService(
           WithDrawRepository withDrawRepository,
           TransactionRepository transactionRepository,
           TransferRepository transferRepository,
           DepositRepository depositRepository,
-          TransactionProducerService transactionProducerService
+          TransactionProducerService transactionProducerService,
+          WalletFeignClient walletFeignClient
   ) {
       this.transferRepository = transferRepository;
       this.depositRepository = depositRepository;
       this.withDrawRepository = withDrawRepository;
       this.transactionRepository = transactionRepository;
       this.transactionProducerService = transactionProducerService ;
+      this.walletFeignClient = walletFeignClient;
   }
 
 
@@ -51,6 +54,11 @@ public class TransactionService {
           savedWithDraw.setStatus(TransactionStatus.SUCCESS);
           withDrawRepository.save(savedWithDraw);
 
+        createNotification(
+          "Your transaction has been processed:: withdraw "+withdraw.getAmount()
+            +" in "+withdraw.getWalletId(),
+          withdraw.getWalletId()
+        );
 
           // Could implement compensation/rollback logic here if needed
       } catch (Exception e) {
@@ -61,7 +69,7 @@ public class TransactionService {
       }
   }
 
-  public void createTransfer(Transfer transfer) {
+  public void createTransfer(Transfer transfer ) {
       try {
           // Set initial status
           transfer.setStatus(TransactionStatus.PENDING);
@@ -73,7 +81,20 @@ public class TransactionService {
           savedTransfer.setStatus(TransactionStatus.SUCCESS);
           transferRepository.save(savedTransfer);
 
-          // Could implement compensation/rollback logic here if needed
+        createNotification(
+          "Your transaction has been processed:: transfer "+transfer.getAmount()
+            +" from "+transfer.getWalletId()+" to "+transfer.getTargetWalletId(),
+          transfer.getWalletId()
+        );
+
+
+        createNotification(
+          "Your transaction has been processed:: received "+transfer.getAmount()
+            +" from "+transfer.getWalletId(),
+          transfer.getTargetWalletId()
+        );
+
+
       } catch (Exception e) {
           transfer.setStatus(TransactionStatus.FAILED);
           transferRepository.save(transfer);
@@ -94,7 +115,14 @@ public class TransactionService {
           savedDeposit.setStatus(TransactionStatus.SUCCESS);
           depositRepository.save(savedDeposit);
 
-          // Could implement compensation/rollback logic here if needed
+          createNotification(
+            "Your transaction has been processed:: deposit "+deposit.getAmount()
+              +" in "+deposit.getWalletId(),
+            deposit.getWalletId()
+          );
+
+
+        // Could implement compensation/rollback logic here if needed
       } catch (Exception e) {
           deposit.setStatus(TransactionStatus.FAILED);
           depositRepository.save(deposit);
@@ -114,7 +142,14 @@ public class TransactionService {
       return transferRepository.findAll();
   }
 
+  private void createNotification(String message , Long walletId) {
+    NotificationRequest notificationRequest2 = NotificationRequest.builder()
+      .userId(walletFeignClient.getUser(walletId))
+      .message(message)
+      .build();
 
+    transactionProducerService.sendNotificationRequests(notificationRequest2);
+  }
 
   // List all transactions
   public List<Transaction> listTransactions() {

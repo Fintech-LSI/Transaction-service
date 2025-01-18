@@ -15,28 +15,28 @@ import java.util.Map;
 
 @Configuration
 public class KafkaConsumerConfig {
-  @Bean
-  public ConsumerFactory<String, TransactionRequest> consumerFactory() {
-    Map<String, Object> props = new HashMap<>();
-    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "10.0.0.26:9092");
-    props.put(ConsumerConfig.GROUP_ID_CONFIG, "transaction-service-group");
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-    props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-    props.put(JsonDeserializer.TYPE_MAPPINGS,
-      "transactionRequest:com.lsi.transaction.dto.request.TransactionRequest");
-    props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
-
-    return new DefaultKafkaConsumerFactory<>(props,
-      new StringDeserializer(),
-      new JsonDeserializer<>(TransactionRequest.class, false));
-  }
-
-  @Bean
-  public ConcurrentKafkaListenerContainerFactory<String, TransactionRequest> kafkaListenerContainerFactory() {
-    ConcurrentKafkaListenerContainerFactory<String, TransactionRequest> factory =
-      new ConcurrentKafkaListenerContainerFactory<>();
-    factory.setConsumerFactory(consumerFactory());
-    return factory;
-  }
+//  @Bean
+//  public ConsumerFactory<String, TransactionRequest> consumerFactory() {
+//    Map<String, Object> props = new HashMap<>();
+//    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "10.0.0.26:9092");
+//    props.put(ConsumerConfig.GROUP_ID_CONFIG, "transaction-service-group");
+//    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+//    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+//    props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+//    props.put(JsonDeserializer.TYPE_MAPPINGS,
+//      "transactionRequest:com.lsi.transaction.dto.request.TransactionRequest");
+//    props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
+//
+//    return new DefaultKafkaConsumerFactory<>(props,
+//      new StringDeserializer(),
+//      new JsonDeserializer<>(TransactionRequest.class, false));
+//  }
+//
+//  @Bean
+//  public ConcurrentKafkaListenerContainerFactory<String, TransactionRequest> kafkaListenerContainerFactory() {
+//    ConcurrentKafkaListenerContainerFactory<String, TransactionRequest> factory =
+//      new ConcurrentKafkaListenerContainerFactory<>();
+//    factory.setConsumerFactory(consumerFactory());
+//    return factory;
+//  }
 }

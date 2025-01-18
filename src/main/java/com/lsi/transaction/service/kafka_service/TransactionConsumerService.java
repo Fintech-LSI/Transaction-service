@@ -22,8 +22,7 @@ import java.time.LocalDateTime;
 public class TransactionConsumerService {
 
   private final TransactionService transactionService;
-  private final TransactionProducerService transactionProducerService;
-  private final WalletFeignClient walletFeignClient;
+
   @KafkaListener(
     topics = "transaction-requests",
     groupId = "transaction-service-group"
@@ -42,18 +41,7 @@ public class TransactionConsumerService {
             .build();
           transactionService.createTransfer(transfer);
 
-          createNotification(
-            "Your transaction has been processed:: transfer "+request.getAmount()
-              +" from "+request.getWalletId()+" to "+request.getTargetWalletId(),
-            request.getWalletId()
-          );
 
-
-          createNotification(
-            "Your transaction has been processed:: received "+request.getAmount()
-              +" from "+request.getWalletId(),
-            request.getTargetWalletId()
-          );
 
 
           break;
@@ -85,12 +73,5 @@ public class TransactionConsumerService {
     }
   }
 
-  private void createNotification(String message , Long walletId) {
-    NotificationRequest notificationRequest2 = NotificationRequest.builder()
-      .userId(walletFeignClient.getUser(walletId))
-      .message(message)
-      .build();
 
-    transactionProducerService.sendNotificationRequests(notificationRequest2);
-  }
 }
