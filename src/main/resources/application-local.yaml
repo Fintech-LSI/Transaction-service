@@ -1,38 +1,38 @@
-spring:
-  application:
-    name: transaction-service
-  config:
-    import: optional:configserver:http://localhost:8889
-  kafka:
-    consumer:
-      bootstrap-servers: localhost:9092
-      group-id: transaction-service-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
-        spring.json.type.mappings: transactionRequest:com.lsi.transaction.dto.request.TransactionRequest
-        spring.json.use.type.headers: false
-        spring.json.value.default.type: com.lsi.transaction.dto.request.TransactionRequest
-
-    producer:
-      bootstrap-servers: localhost:9092
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      properties:
-        spring.json.add.type.headers: false
-
-
-
-var:
-  TOPIC:
-    notification-transaction: notification-requests
-
-
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
+#spring:
+#  application:
+#    name: transaction-service
+#  config:
+#    import: optional:configserver:http://localhost:8889
+#  kafka:
+#    consumer:
+#      bootstrap-servers: localhost:9092
+#      group-id: transaction-service-group
+#      auto-offset-reset: earliest
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+#      properties:
+#        spring.json.trusted.packages: "*"
+#        spring.json.type.mappings: transactionRequest:com.lsi.transaction.dto.request.TransactionRequest
+#        spring.json.use.type.headers: false
+#        spring.json.value.default.type: com.lsi.transaction.dto.request.TransactionRequest
+#
+#    producer:
+#      bootstrap-servers: localhost:9092
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      properties:
+#        spring.json.add.type.headers: false
+#
+#
+#
+#var:
+#  TOPIC:
+#    notification-transaction: notification-requests
+#
+#
+#
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"

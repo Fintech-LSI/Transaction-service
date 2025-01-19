@@ -1,3 +1,45 @@
+#apiVersion: v1
+#kind: ConfigMap
+#metadata:
+#  name: transaction-service-config
+#  namespace: fintech
+#data:
+#  application.yml: |-
+#    spring:
+#      application:
+#        name: transaction-service
+#      jpa:
+#        hibernate:
+#          ddl-auto: update
+#        database-platform: org.hibernate.dialect.PostgreSQLDialect
+#      config:
+#        import: optional:configserver:http://config-service:8889
+#      kafka:
+#        consumer:
+#          bootstrap-servers: 10.0.0.26:9092
+#          group-id: transaction-service-group
+#          auto-offset-reset: earliest
+#          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#          value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+#          properties:
+#            spring.json.trusted.packages: "*"
+#            spring.json.type.mapping: transactionRequest:com.lsi.transaction.dto.request.TransactionRequest
+#            spring.json.use.type.headers: false
+#
+#    server:
+#      port: 8599
+#
+#    management:
+#      endpoints:
+#        web:
+#          exposure:
+#            include: "*"
+#      endpoint:
+#        health:
+#          show-details: when-authorized
+#          probes:
+#            enabled: true
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,12 +48,10 @@ metadata:
 data:
   application.yml: |-
     spring:
+      profiles:
+        active: local
       application:
         name: transaction-service
-      jpa:
-        hibernate:
-          ddl-auto: update
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
       config:
         import: optional:configserver:http://config-service:8889
       kafka:
@@ -23,19 +63,30 @@ data:
           value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
           properties:
             spring.json.trusted.packages: "*"
-            spring.json.type.mapping: transactionRequest:com.lsi.transaction.dto.request.TransactionRequest
+            spring.json.type.mappings: transactionRequest:com.lsi.transaction.dto.request.TransactionRequest
             spring.json.use.type.headers: false
-    
+            spring.json.value.default.type: com.lsi.transaction.dto.request.TransactionRequest
+        producer:
+          bootstrap-servers: 10.0.0.26:9092
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          properties:
+            spring.json.add.type.headers: false
+
+    var:
+      TOPIC:
+        notification-transaction: notification-requests
+
+    management:
+          endpoints:
+            web:
+              exposure:
+                include: "*"
+          endpoint:
+            health:
+              show-details: when-authorized
+              probes:
+                enabled: true
     server:
       port: 8599
-    
-    management:
-      endpoints:
-        web:
-          exposure:
-            include: "*"
-      endpoint:
-        health:
-          show-details: when-authorized
-          probes:
-            enabled: true
+
